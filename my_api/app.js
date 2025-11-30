@@ -1,9 +1,15 @@
 // app.js
    const express = require('express');
+   const cors = require('cors');
    const swaggerUi = require('swagger-ui-express');
    const swaggerJSDoc = require('swagger-jsdoc');
 
    const app = express();
+   app.use(cors({
+    origin: "*",
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    }));
    const port = 3000;
 
    // Swagger definition
