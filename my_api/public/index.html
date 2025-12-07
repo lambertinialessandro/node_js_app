@@ -9,42 +9,155 @@
     />
   </head>
   <body>
-    <div id="listaUtenti" class=""></div>
+    <div class="container mt-4">
+      <div id="listaUtenti" class="row"></div>
+    </div>
+
+    <div class="modal fade" id="modalDettagliUtente" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Dettagli utente</h5>
+            <button class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body" id="dettagliModalBody"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="modalModificaUtente" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Modifica utente</h5>
+            <button class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <form class="d-flex flex-column">
+              <label>Nome</label>
+              <input type="text" id="formNome"/>
+
+              <label>Età</label>
+              <input type="number" id="formEta"/>
+
+              <label>Ruolo</label>
+              <input type="text" id="formRuolo"/>
+
+              <label>Email</label>
+              <input type="email" id="formEmail"/>
+
+              <label>Phone</label>
+              <input type="text" id="FormPhone"/>
+
+              <button type="submit">Conferma</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-      const API_BASE_URL = "https://orange-waffle-64wj497xw9rcqr6-3000.app.github.dev"
-      const AUTH_TOKEN = "Bearer 5IDtoken"
+      const API_BASE_URL =
+        "https://orange-waffle-64wj497xw9rcqr6-3000.app.github.dev";
+      const AUTH_TOKEN = "Bearer 5IDtoken";
 
       document.addEventListener("DOMContentLoaded", () => {
         leggiUtenti();
-      })
+      });
 
       async function leggiUtenti() {
-        const dati = await fetch(
-          `${API_BASE_URL}/api/users`
-        );
+        const dati = await fetch(`${API_BASE_URL}/api/users`);
         const listaUtentiJSON = await dati.json();
 
         mostraUtenti(listaUtentiJSON);
       }
 
+      async function mostraDettagliUtente(name) {
+        const dati = await fetch(`${API_BASE_URL}/api/users/${name}`);
+        const dettagliUtente = await dati.json();
+
+        const dettagliModalBody = document.getElementById("dettagliModalBody");
+        dettagliModalBody.innerHTML = "";
+
+        dettagliModalBody.innerHTML += `
+        <p>Nome: ${dettagliUtente.name}</p>
+        <p>Età: ${dettagliUtente.age}</p>
+        `;
+
+        if (!!dettagliUtente.role){
+          dettagliModalBody.innerHTML += `<p>Ruolo: ${dettagliUtente.role}</p>`;
+        }
+        if (!!dettagliUtente.data && !!dettagliUtente.data.email){
+          dettagliModalBody.innerHTML += `<p>Email: ${dettagliUtente.data.email}</p>`
+        }
+        if (!!dettagliUtente.data && !!dettagliUtente.data.phone){
+          dettagliModalBody.innerHTML += `<p>Phone: ${dettagliUtente.data.phone}</p>`
+        }
+
+        const modal = document.getElementById("modalDettagliUtente");
+        const bootstrapModal = new bootstrap.Modal(modal);
+        bootstrapModal.show();
+      }
+
+      async function mostraModificaUtente(name) {
+        const dati = await fetch(`${API_BASE_URL}/api/users/${name}`);
+        const dettagliUtente = await dati.json();
+
+        console.log("dettagliUtente", dettagliUtente)
+
+        const formNome = document.getElementById("formNome")
+        formNome.value = dettagliUtente.name
+        const formEta = document.getElementById("formEta")
+        formEta.value = dettagliUtente.age
+
+        const formRuolo = document.getElementById("formRuolo")
+        if (!!dettagliUtente.role){
+          formRuolo.value = dettagliUtente.role
+        } else {
+          formRuolo.value = ""
+        }
+        const formEmail = document.getElementById("formEmail")
+        if (!!dettagliUtente.data && !!dettagliUtente.data.email){
+          formEmail.value = dettagliUtente.data.email
+        } else {
+          formEmail.value = ""
+        }
+        const FormPhone = document.getElementById("FormPhone")
+        if (!!dettagliUtente.data && !!dettagliUtente.data.phone){
+          FormPhone.value = dettagliUtente.data.phone
+        } else {
+          FormPhone.value = ""
+        }
+
+        const modal = document.getElementById("modalModificaUtente");
+        const bootstrapModal = new bootstrap.Modal(modal);
+        bootstrapModal.show();
+      }
+
       function mostraUtenti(listaUtentiJSON) {
         const divListaUtenti = document.getElementById("listaUtenti");
-        divListaUtenti.innerHTML =""
+        divListaUtenti.innerHTML = "";
 
         for (const utente of listaUtentiJSON) {
+          // xs sm md lg xl
           divListaUtenti.innerHTML += `
-          <div>
-            <h3>${utente.name}</h3>
-            <p>${utente.age}</p>
-            <button onclick="">Dettagli</button>
-            <button onclick="">Modifica</button>
-            <button onclick="">Elimina</button>
+          <div class="col-sm-6 col-md-4 col-lg-4 mb-4">
+            <div class="card">
+              <div class="card-body d-flex flex-column">
+                <h3 class="card-title">${utente.name}</h3>
+                <p class="card-text">${utente.age}</p>
+
+                <div class="">
+                  <button class="btn btn-primary" onclick="mostraDettagliUtente('${utente.name}')">Dettagli</button>
+                  <button class="btn btn-warning" onclick="mostraModificaUtente('${utente.name}')">Modifica</button>
+                  <button class="btn btn-danger" onclick="">Elimina</button>
+                  </div>
+                </div>
+            </div>
           </div>`;
         }
       }
-
     </script>
   </body>
 </html>
